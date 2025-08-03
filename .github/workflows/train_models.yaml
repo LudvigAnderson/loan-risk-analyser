@@ -1,0 +1,55 @@
+name: Train ML Models
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - model_training/**
+      - .github/workflows/train_models.yaml
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: loan-risk-analyser
+      REGION: europe-west4
+      REPOSITORY: loan-risk-analyser-containers
+      IMAGE_NAME: training-job
+      IMAGE_TAG: latest
+
+      VERTEX_YAML: model_training/settings/vertex.yaml
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set IMAGE_URI variable
+        run: |
+          echo "IMAGE_URI=${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}" >> $GITHUB_ENV
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Docker auth for Artifact Registry
+        run: gcloud auth configure-docker $REGION-docker.pkg.dev
+        
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_URI model_training
+      
+      - name: Push Docker image to Artifact Registry
+        run: docker push $IMAGE_URI
+      
+      - name: Insert the image URI inside the Vertex AI settings YAML file
+        run: sed -i "s|__IMAGE_URI__|$IMAGE_URI|g" $VERTEX_YAML
+      
+      - name: Submit Vertex AI training job
+        run: |
+          gcloud ai custom-jobs create \
+            --region=$REGION \
+            --display-name=$IMAGE_NAME-$(date +%Y%m%d-%H%M%S) \
+            --config=$VERTEX_YAML
