@@ -91,7 +91,7 @@ def train_aft_model():
     monotone_constraints = settings["monotone_constraints"]
 
     # Get the data from Google Cloud Storage
-    df = get_lending_club_data(DATA_FINAL_DIR / "lending_club_filtered.csv", usecols=PREDICTION_FEATURES)
+    df = get_lending_club_data(usecols=PREDICTION_FEATURES)
 
     # Transform the data
     pipeline = create_aft_pipeline()
@@ -128,7 +128,7 @@ def train_causal_model():
     cloud_paths = load_gcloud_paths()
 
     # Get the data from Google Cloud Storage
-    complete_df = get_lending_club_data(DATA_FINAL_DIR / "lending_club_filtered.csv")
+    complete_df = get_lending_club_data()
 
     # Transform the data
     dml_pipeline = create_dml_pipeline()
