@@ -47,6 +47,9 @@ jobs:
       - name: Insert the image URI inside the Vertex AI settings YAML file
         run: sed -i "s|__IMAGE_URI__|$IMAGE_URI|g" $VERTEX_YAML
       
+      - name: Check authenticated account
+        run: gcloud auth list
+
       - name: Submit Vertex AI training job
         run: |
           gcloud ai custom-jobs create \
