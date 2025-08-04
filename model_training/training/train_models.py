@@ -177,7 +177,7 @@ def train_causal_model():
     causal_y = transformed_df[causal_col]
 
     causal_model = XGBRegressor(
-        **nuissance_params # Should probably change this
+        **nuissance_params
     )
 
     causal_model.fit(causal_X, causal_y)
