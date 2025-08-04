@@ -8,19 +8,18 @@ on:
       - model_training/**
       - .github/workflows/train_models.yaml
 
+env:
+  PROJECT_ID: loan-risk-analyser
+  REGION: europe-west4
+  REPOSITORY: loan-risk-analyser-containers
+  IMAGE_NAME: training-job
+  IMAGE_TAG: latest
+
 jobs:
-  train:
+  docker:
     runs-on: ubuntu-latest
-
-    env:
-      PROJECT_ID: loan-risk-analyser
-      REGION: europe-west4
-      REPOSITORY: loan-risk-analyser-containers
-      IMAGE_NAME: training-job
-      IMAGE_TAG: latest
-
-      VERTEX_YAML: model_training/settings/vertex.yaml
-
+    outputs:
+      image-uri: ${{ steps.uri-setter.outputs.IMAGE_URI }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -33,9 +32,6 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Activate service account
-        run: gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
       
       - name: Set up Docker auth for Artifact Registry
         run: gcloud auth configure-docker $REGION-docker.pkg.dev
@@ -46,12 +42,30 @@ jobs:
       
       - name: Push Docker image to Artifact Registry
         run: docker push $IMAGE_URI
+
+      - name: Set image URI
+        id: uri-setter
+        run: echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_OUTPUT
+
+  train:
+    needs: docker
+    runs-on: ubuntu-latest
+    env:
+      VERTEX_YAML: model_training/settings/vertex.yaml
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Activate service account
+        run: gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
       
       - name: Insert the image URI inside the Vertex AI settings YAML file
-        run: sed -i "s|__IMAGE_URI__|$IMAGE_URI|g" $VERTEX_YAML
-      
-      - name: Check authenticated account
-        run: gcloud auth list
+        run: sed -i "s|__IMAGE_URI__|${{ needs.docker.outputs.image-uri }}|g" $VERTEX_YAML
 
       - name: Submit Vertex AI training job
         run: |
