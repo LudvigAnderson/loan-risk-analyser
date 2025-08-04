@@ -9,7 +9,7 @@ workerPoolSpecs:
 
 scheduling:
   timeout: 3600s
-  strategy: SPOT
+  strategy: STANDARD
 
 serviceAccount: github-ci@loan-risk-analyser.iam.gserviceaccount.com
 
