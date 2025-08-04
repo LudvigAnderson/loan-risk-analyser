@@ -33,6 +33,9 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Activate service account
+        run: gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
       
       - name: Set up Docker auth for Artifact Registry
         run: gcloud auth configure-docker $REGION-docker.pkg.dev
