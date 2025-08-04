@@ -1,6 +1,6 @@
 workerPoolSpecs:
   - machineSpec:
-      machineType: e2-highmem-2
+      machineType: n1-highmem-2
       acceleratorType: NVIDIA_TESLA_T4
       acceleratorCount: 1
     replicaCount: 1
