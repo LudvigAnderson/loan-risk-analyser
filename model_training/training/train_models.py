@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime
+import os
 
 import optuna
 from xgboost import XGBRegressor, XGBClassifier
@@ -111,6 +112,7 @@ def train_aft_model():
     # Save the model locally
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     model_path = SAVED_MODELS_DIR / f"aft_model_{timestamp}.ubj"
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
     best_model.save_model(model_path)
     logger.info(f"Best model saved locally to {model_path}.")
 
@@ -183,6 +185,7 @@ def train_causal_model():
     # Save the model locally
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     model_path = SAVED_MODELS_DIR / f"causal_model_{timestamp}.ubj"
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
     causal_model.save_model(model_path)
 
     logger.info(f"Causal model saved locally to {model_path}.")
