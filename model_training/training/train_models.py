@@ -6,7 +6,7 @@ import optuna
 from xgboost import XGBRegressor, XGBClassifier
 from econml.dml import LinearDML
 
-from models import XGBoostAFT
+from models import XGBoostAFT, XGBoostDML
 from utils.settings_loader import load_training_settings, load_gcloud_paths
 from utils.metrics import concordance_index
 from utils.google_storage import upload_to_gcs
@@ -81,7 +81,7 @@ def _run_trials(data: Dict, constraints: Dict, n_trials: int = 5) -> Tuple[XGBoo
     logger.info(f"Optuna finished running {n_trials} trials.")
     return best_model, study
 
-def train_aft_model():  
+def train_aft_model(data_path=None):  
     settings = load_training_settings()
     cloud_paths = load_gcloud_paths()
 
@@ -92,7 +92,7 @@ def train_aft_model():
     monotone_constraints = settings["monotone_constraints"]
 
     # Get the data from Google Cloud Storage
-    df = get_lending_club_data(usecols=PREDICTION_FEATURES)
+    df = get_lending_club_data(usecols=PREDICTION_FEATURES, path=data_path)
 
     # Transform the data
     pipeline = create_aft_pipeline()
@@ -124,13 +124,13 @@ def train_aft_model():
     )
 
 
-def train_causal_model():
+def train_causal_model(data_path=None):
     settings = load_training_settings()
     nuissance_params = settings["nuissance_params"]
     cloud_paths = load_gcloud_paths()
 
     # Get the data from Google Cloud Storage
-    complete_df = get_lending_club_data()
+    complete_df = get_lending_club_data(path=data_path)
 
     # Transform the data
     dml_pipeline = create_dml_pipeline()
@@ -145,8 +145,8 @@ def train_causal_model():
     X = transformed_df.drop(columns=y_cols + t_cols)
 
     # Create nuissance models for y and t
-    interest_rate_model = XGBRegressor(**nuissance_params)
-    default_rate_model = XGBClassifier(**nuissance_params)
+    interest_rate_model = XGBoostDML(nuissance_params, XGBRegressor) #XGBRegressor(**nuissance_params)
+    default_rate_model = XGBoostDML(nuissance_params, XGBClassifier) #XGBClassifier(**nuissance_params)
 
     est = LinearDML(
         model_y=default_rate_model,
@@ -154,11 +154,16 @@ def train_causal_model():
         discrete_outcome=True
     )
 
+    logger.info("DML beginning.")
+
     est.fit(
         Y=y.values.ravel(),
         T=t.values.ravel(),
         X=X.values
     )
+
+    logger.info("DML model fitted.")
+
     causal_effect_estimates = est.const_marginal_ate(X).squeeze()
 
     # Choose only the features that will be available in production
@@ -176,11 +181,15 @@ def train_causal_model():
     causal_X = transformed_df.drop(columns=causal_col)
     causal_y = transformed_df[causal_col]
 
+    logger.info("Fitting causal XGBoost model.")
+
     causal_model = XGBRegressor(
         **nuissance_params
     )
-
+    
     causal_model.fit(causal_X, causal_y)
+
+    logger.info("Causal XGBoost model fitted.")
 
     # Save the model locally
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
