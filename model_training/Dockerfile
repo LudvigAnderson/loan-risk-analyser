@@ -3,7 +3,7 @@ WORKDIR /app
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    python3 python3-venv python3-pip python3-dev build-essential && \
+    python3 python3-venv python3-pip python3-dev build-essential libgomp1 && \
     rm -rf /var/lib/apt/lists/*
 
 
@@ -30,7 +30,7 @@ ENV PATH="/venv/bin:$PATH"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    python3 && \
+    python3 libgomp1 && \
     rm -rf /var/lib/apt/lists/*
 
 COPY . .
