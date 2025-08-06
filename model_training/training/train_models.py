@@ -145,8 +145,8 @@ def train_causal_model(data_path=None):
     X = transformed_df.drop(columns=y_cols + t_cols)
 
     # Create nuissance models for y and t
-    interest_rate_model = XGBoostDML(nuissance_params, XGBRegressor) #XGBRegressor(**nuissance_params)
-    default_rate_model = XGBoostDML(nuissance_params, XGBClassifier) #XGBClassifier(**nuissance_params)
+    interest_rate_model = XGBoostDML(nuissance_params, XGBRegressor)
+    default_rate_model = XGBoostDML(nuissance_params, XGBClassifier)
 
     est = LinearDML(
         model_y=default_rate_model,
@@ -164,7 +164,7 @@ def train_causal_model(data_path=None):
 
     logger.info("DML model fitted.")
 
-    causal_effect_estimates = est.const_marginal_ate(X).squeeze()
+    causal_effect_estimates = est.const_marginal_effect(X).squeeze()
 
     # Choose only the features that will be available in production
     df = complete_df[PREDICTION_FEATURES]
