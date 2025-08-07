@@ -1,0 +1,5 @@
+gcs_bucket: loan-risk-analyser-assets
+
+blobs:
+  aft_model: models/aft_model.ubj
+  causal_model: models/causal_model.ubj

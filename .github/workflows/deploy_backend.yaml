@@ -1,0 +1,72 @@
+name: Deploy FastAPI to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - backend/**
+      - .github/workflows/deploy_backend.yaml
+
+env:
+  PROJECT_ID: loan-risk-analyser
+  REGION: europe-west4
+  REPOSITORY: loan-risk-analyser-containers
+  IMAGE_NAME: deploy-backend
+  IMAGE_TAG: latest
+  SERVICE_NAME: loan-risk-api
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    outputs:
+      image-uri: ${{ steps.uri-setter.outputs.IMAGE_URI }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set IMAGE_URI variable
+        run: |
+          echo "IMAGE_URI=${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}" >> $GITHUB_ENV
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set up Docker auth for Artifact Registry
+        run: gcloud auth configure-docker $REGION-docker.pkg.dev
+        
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_URI backend
+      
+      - name: Push Docker image to Artifact Registry
+        run: docker push $IMAGE_URI
+
+      - name: Set image URI
+        id: uri-setter
+        run: echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_OUTPUT
+
+  train:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Activate service account
+        run: gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+            --image=${{ needs.docker.outputs.image-uri }} \
+            --region=$REGION \
+            --platform=managed \
+            --allow-unauthenticated

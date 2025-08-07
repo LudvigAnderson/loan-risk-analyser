@@ -1,0 +1,9 @@
+fastapi[standard]
+uvicorn[standard]
+google-cloud-storage
+PyYAML
+xgboost
+pandas
+shap
+numpy
+pandas
