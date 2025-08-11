@@ -40,7 +40,7 @@ def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     # project, I consider it adequate to use the last month's rate.
     df["unemployment_rate"] = 0.46
 
-    df["date"] = date.today()
+    df["date"] = pd.to_datetime(date.today())
 
     angle = 2 * np.pi * (df["date"].dt.month - 1) / 12
     df["month_sin"] = np.sin(angle)
