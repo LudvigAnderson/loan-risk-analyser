@@ -25,9 +25,11 @@ def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     # need to change this in the transformer
     df["loan/inc"] = df["loan_amnt"] / df["annual_inc"]
     df["emp_length/term"] = df["emp_length"] / df["term"]
-    df["acc_satisfied_rate"] = df["num_sats"] / df["total_acc"]
+    df["acc_satisfied_rate"] = df["num_sats"] / df["total_acc"] # Need to fix this
     df["loan/term"] = df["loan_amnt"] / df["term"]
     df["total_bal/inc"] = df["tot_cur_bal"] / df["annual_inc"]
+
+    df["pct_tl_nvr_dlq"] = np.divide(df["num_sats"], df["total_acc"])
 
     # In a real production environment, I would consider setting
     # this value based on an API call to Statistics Norway, so that

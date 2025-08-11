@@ -39,6 +39,5 @@ class LoanApplicant(BaseModel): # Need to check which can be np.nan
     delinq_amnt: float
     collections_12_mths_ex_med: int
     num_tl_90g_dpd_24m: int
-    pct_tl_nvr_dlq: float
     
 

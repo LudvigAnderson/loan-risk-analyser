@@ -48,7 +48,7 @@ jobs:
         id: uri-setter
         run: echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_OUTPUT
 
-  train:
+  deploy:
     needs: docker
     runs-on: ubuntu-latest
     steps:
