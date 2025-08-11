@@ -7,7 +7,6 @@ class LoanApplicant(BaseModel): # Need to check which can be np.nan
     loan_amnt: float
     term: int # in months
     emp_length: int
-    date: date
 
     bc_bal: float
     total_bc_limit: float

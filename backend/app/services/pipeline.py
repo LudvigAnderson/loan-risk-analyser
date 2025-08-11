@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from datetime import date
 from app.models.loan_applicant import LoanApplicant
 from fastapi import FastAPI
 from xgboost import Booster
@@ -9,6 +10,8 @@ from pandas import DataFrame
 def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     df = pd.DataFrame([data.model_dump()])
     df = df.replace({None: np.nan})
+
+
 
     df["bc_util"] = df["bc_bal"] / df["total_bc_limit"]
     df["revol_util"] = df["bc_util"]
@@ -37,7 +40,7 @@ def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     # project, I consider it adequate to use the last month's rate.
     df["unemployment_rate"] = 0.46
 
-    df["date"] = pd.to_datetime(df["date"])
+    df["date"] = date.today()
 
     angle = 2 * np.pi * (df["date"].dt.month - 1) / 12
     df["month_sin"] = np.sin(angle)
