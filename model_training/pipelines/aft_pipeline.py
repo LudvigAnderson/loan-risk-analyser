@@ -19,6 +19,8 @@ from transformers.feature_engineering import (
     PercentageTransformer
 )
 
+from utils.interaction_operations import divide, dividep1
+
 # Pipeline used to transform data to be used by the prediction models
 def create_aft_pipeline(drop_issue_d: bool = False) -> Pipeline:
     # These columns will be dropped completely at the end of the pipeline:
@@ -111,13 +113,12 @@ def create_aft_pipeline(drop_issue_d: bool = False) -> Pipeline:
 
         # Makes interaction terms
         ("interaction_transformer", InteractionTransformer(
-            divisions={
-                "loan/inc": ("loan_amnt", "annual_inc"),
-                "total_bal/inc": ("tot_cur_bal", "annual_inc"),
-                "acc_satisfied_rate": ("num_sats", "total_acc"),
-                "loan/term": ("loan_amnt", "term"),
-                "emp_length/term": ("emp_length", "term"),
-                # history score? credithistorymonths/pubrec
+            features={
+                "loan/inc": ("loan_amnt", "annual_inc", dividep1),
+                "total_bal/inc": ("tot_cur_bal", "annual_inc", dividep1),
+                "acc_satisfied_rate": ("num_sats", "total_acc", divide),
+                "loan/term": ("loan_amnt", "term", divide),
+                "emp_length/term": ("emp_length", "term", divide),
             }
         )),
 
