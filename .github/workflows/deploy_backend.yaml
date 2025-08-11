@@ -70,3 +70,4 @@ jobs:
             --region=$REGION \
             --platform=managed \
             --allow-unauthenticated
+            --set-secrets=API_SECRET_KEY=API_SECRET_KEY:latest
