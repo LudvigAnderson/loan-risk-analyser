@@ -7,7 +7,7 @@ def update_models_in_API():
 
     response = requests.post(
         URL,
-        headers={"api_key": secret},
+        headers={"api-key": secret},
         timeout=30
     )
 
