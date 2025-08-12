@@ -1,3 +1,7 @@
+project_id: loan-risk-analyser
+
+api_secret_id: API_SECRET_KEY
+
 gcs_bucket: loan-risk-analyser-assets
 
 blobs:

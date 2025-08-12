@@ -15,8 +15,7 @@ RUN python3 -m venv /venv && \
     /venv/bin/pip install --upgrade pip setuptools wheel && \
     /venv/bin/pip install -r requirements.txt
 
-#COPY . .
-#RUN /venv/bin/pip install .
+    
 
 FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu20.04 AS runtime
 
