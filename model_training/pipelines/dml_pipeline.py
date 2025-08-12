@@ -20,6 +20,8 @@ from transformers.feature_engineering import (
     FicoTransformer,
 )
 
+from utils.interaction_operations import divide, dividep1
+
 # Pipeline for data fed to the nuisance models used in EconML's LinearDML model
 def create_dml_pipeline() -> Pipeline:
     OHE_cols = [
@@ -82,12 +84,12 @@ def create_dml_pipeline() -> Pipeline:
 
 
         ("interaction_transformer", InteractionTransformer(
-            divisions={
-                "loan/inc": ("loan_amnt", "annual_inc"),
-                "total_bal/inc": ("tot_cur_bal", "annual_inc"),
-                "acc_satisfied_rate": ("num_sats", "total_acc"),
-                "loan/term": ("loan_amnt", "term"),
-                "emp_length/term": ("emp_length", "term"),
+            features={
+                "loan/inc": ("loan_amnt", "annual_inc", dividep1),
+                "total_bal/inc": ("tot_cur_bal", "annual_inc", dividep1),
+                "acc_satisfied_rate": ("num_sats", "total_acc", divide),
+                "loan/term": ("loan_amnt", "term", divide),
+                "emp_length/term": ("emp_length", "term", divide),
             }
         )),
 
