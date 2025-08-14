@@ -40,6 +40,9 @@ def get_all_calculations(app: FastAPI, data: LoanApplicant) -> Dict[str, Any]:
     causal_effect = predict(causal_model, df)
     shap_values, base_value = get_shap_values(aft_model, explainer, df)
 
+    print(df)
+    print(data)
+
     return {
         "median_survival_time": median_survival_time,
         "causal_effect": causal_effect,
