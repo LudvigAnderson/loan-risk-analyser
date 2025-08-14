@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-import pandas as pd
+import numpy as np
 from app.services.pipeline import transform_data
 
 from xgboost import Booster, DMatrix
@@ -40,18 +40,11 @@ def get_all_calculations(app: FastAPI, data: LoanApplicant) -> Dict[str, Any]:
     causal_effect = predict(causal_model, df)
     shap_values, base_value = get_shap_values(aft_model, explainer, df)
 
-    print(str(median_survival_time))
-    print(str(causal_effect))
-    print(str(shap_values))
-    print(str(base_value))
-    print(str(data.model_dump()))
-    print(str(df.where(pd.notna(df), None).to_dict(orient="records")))
-
     return {
         "median_survival_time": median_survival_time,
         "causal_effect": causal_effect,
         "shap_values": shap_values,
         "base_value": base_value,
         "raw_data": data.model_dump(),
-        "transformed_data": df.where(pd.notna(df), None).to_dict(orient="records")
+        "transformed_data": df.replace({np.nan: None}).to_dict(orient="records")[0]
     }
