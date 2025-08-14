@@ -45,5 +45,5 @@ def get_all_calculations(app: FastAPI, data: LoanApplicant) -> Dict[str, Any]:
         "shap_values": shap_values,
         "base_value": base_value,
         "raw_data": data.model_dump(),
-        "transformed_data": df.to_dict(orient="records")
+        "transformed_data": df.fillna(None).to_dict(orient="records")
     }
