@@ -11,7 +11,7 @@ def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     df = pd.DataFrame([data.model_dump()])
     df = df.replace({None: np.nan})
 
-
+    # Need to use the safe division
 
     df["bc_util"] = df["bc_bal"] / df["total_bc_limit"]
     df["revol_util"] = df["bc_util"]
@@ -25,7 +25,6 @@ def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     df["tot_cur_bal"] =  df["bc_bal"] + cur_il
     df["total_bal_ex_mort"] = df["tot_cur_bal"] - df["mortgage"]
 
-    # need to change this in the transformer
     df["loan/inc"] = df["loan_amnt"] / df["annual_inc"]
     df["emp_length/term"] = df["emp_length"] / df["term"]
     df["acc_satisfied_rate"] = df["num_sats"] / df["total_acc"] # Need to fix this

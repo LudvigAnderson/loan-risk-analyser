@@ -5,7 +5,7 @@ from xgboost import Booster, DMatrix
 from shap import TreeExplainer
 from pandas import DataFrame
 from typing import Dict, Tuple, Any
-from models.loan_applicant import LoanApplicant
+from app.models.loan_applicant import LoanApplicant
 
 
 def _reorder_df(model: Booster, df: DataFrame) -> DataFrame:
