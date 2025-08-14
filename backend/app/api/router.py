@@ -16,6 +16,5 @@ async def reload_models(request: Request):
 # Gets predictions from both models, as well as the SHAP values for the AFT model
 @router.post("/predict")
 async def predict(request: Request, data: LoanApplicant):
-    df = transform_data(data, request.app)
-    results = get_all_calculations(request.app, df)
+    results = get_all_calculations(request.app, data)
     return results

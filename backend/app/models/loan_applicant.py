@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date
 
-class LoanApplicant(BaseModel): # Need to check which can be np.nan
+class LoanApplicant(BaseModel):
     annual_inc: float
     loan_amnt: float
     term: int # in months
@@ -10,7 +9,7 @@ class LoanApplicant(BaseModel): # Need to check which can be np.nan
 
     bc_bal: float
     total_bc_limit: float
-    percent_bc_gt_75: float
+    percent_bc_gt_75: Optional[int]
     
     init_mortgage: float
     mortgage: float
