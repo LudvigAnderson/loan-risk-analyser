@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 
 import optuna
-from xgboost import XGBRegressor, XGBClassifier
+from xgboost import XGBRegressor, XGBClassifier, Booster
 from econml.dml import LinearDML
 
 from models import XGBoostAFT, XGBoostDML
@@ -41,15 +41,11 @@ def _split_data(df: DataFrame, data_splits: Dict) -> Dict:
     
     return final_data
 
-def _run_trials(data: Dict, constraints: Dict, n_trials: int = 5) -> Tuple[XGBoostAFT, Study]:
+def _run_trials(data: Dict, constraints: Dict, n_trials: int = 5) -> Study:
     X_optuna = data["optuna_val"]["X"]
     y_optuna = data["optuna_val"]["y"]
-
-    best_c_index = 0
-    best_model = None
     
     def objective(trial: Trial):
-        nonlocal best_c_index, best_model
 
         model = XGBoostAFT(
             learning_rate=trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
@@ -67,10 +63,6 @@ def _run_trials(data: Dict, constraints: Dict, n_trials: int = 5) -> Tuple[XGBoo
 
         c_index = concordance_index(model, X_optuna, y_optuna)
 
-        if c_index > best_c_index:
-            best_c_index = c_index
-            best_model = model
-
         return c_index
     
     logger.info("Optuna trials begun.")
@@ -79,20 +71,17 @@ def _run_trials(data: Dict, constraints: Dict, n_trials: int = 5) -> Tuple[XGBoo
     study.optimize(objective, n_trials=n_trials)
 
     logger.info(f"Optuna finished running {n_trials} trials.")
-    return best_model, study
+    return study
 
-def train_aft_model(data_path=None):  
+
+def train_aft_model(df: DataFrame, n_trials=5):  
     settings = load_training_settings()
-    cloud_paths = load_gcloud_paths()
 
     # Date ranges for training, testing, validation (for XGBoost eval and Optuna)
     data_splits = settings["data_splits"]
 
     # Monotonic constraints for the AFT-XGBoost model
     monotone_constraints = settings["monotone_constraints"]
-
-    # Get the data from Google Cloud Storage
-    df = get_lending_club_data(usecols=PREDICTION_FEATURES, path=data_path)
 
     # Transform the data
     pipeline = create_aft_pipeline()
@@ -102,35 +91,35 @@ def train_aft_model(data_path=None):
     data = _split_data(transformed_df, data_splits)
 
     # Use Optuna for hyperparameter optimization
-    best_model, study = _run_trials(data, monotone_constraints, n_trials=5)
+    study = _run_trials(data, monotone_constraints, n_trials=n_trials)
 
     X_test = data["test"]["X"]
     y_test = data["test"]["y"]
 
-    c_index = concordance_index(best_model, X_test, y_test)
+    full_X_train = pd.concat([data["train"]["X"], data["optuna_val"]["X"]])
+    full_y_train = pd.concat([data["train"]["y"], data["optuna_val"]["y"]])
 
-    # Save the model locally
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    model_path = SAVED_MODELS_DIR / f"aft_model_{timestamp}.ubj"
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    best_model.save_model(model_path)
-    logger.info(f"Best model saved locally to {model_path}.")
+    model_params = {k: v for k, v in study.best_trial.params.items()}
 
-    # Upload the model to Google Cloud Storage
-    upload_to_gcs(
-        local_path=model_path,
-        bucket_name=cloud_paths["gcs_bucket"],
-        blob_name=cloud_paths["blobs"]["aft_model"]
+    best_model = XGBoostAFT(
+        **model_params,
+        X_val=data["xgboost_val"]["X"],
+        y_val=data["xgboost_val"]["y"],
+        monotone_constraints=monotone_constraints
     )
 
+    best_model.fit(full_X_train, full_y_train)
 
-def train_causal_model(data_path=None):
+    #c_index = concordance_index(best_model, X_test, y_test) # Maybe move to API?
+
+    return best_model.get_booster()
+
+
+
+
+def train_causal_model(complete_df: DataFrame) -> Booster:
     settings = load_training_settings()
     nuissance_params = settings["nuissance_params"]
-    cloud_paths = load_gcloud_paths()
-
-    # Get the data from Google Cloud Storage
-    complete_df = get_lending_club_data(path=data_path)
 
     # Transform the data
     dml_pipeline = create_dml_pipeline()
@@ -191,23 +180,45 @@ def train_causal_model(data_path=None):
 
     logger.info("Causal XGBoost model fitted.")
 
-    # Save the model locally
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    model_path = SAVED_MODELS_DIR / f"causal_model_{timestamp}.ubj"
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    causal_model.save_model(model_path)
+    return causal_model.get_booster()
 
-    logger.info(f"Causal model saved locally to {model_path}.")
 
-    # Upload the model to Google Cloud Storage
-    upload_to_gcs(
-        local_path=model_path,
-        bucket_name=cloud_paths["gcs_bucket"],
-        blob_name=cloud_paths["blobs"]["causal_model"]
-    )
+def train_models(data_path=None) -> Tuple[Booster, Booster]:
+    # Get the data from Google Cloud Storage, or locally if a path is provided
+    df = get_lending_club_data(path=data_path)
+    aft = train_aft_model(df[PREDICTION_FEATURES])
+    causal = train_causal_model(df)
 
-    
+    return aft, causal
+
+def train_and_save_models(data_path=None):
+    cloud_paths = load_gcloud_paths()
+
+    aft, causal = train_models(data_path)
+
+    models = {
+        "aft_model": aft,
+        "causal_model": causal
+    }
+
+    for name, model in models.items():
+        # Save the model locally
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_path = SAVED_MODELS_DIR / f"{name}_{timestamp}.ubj"
+        os.makedirs(os.path.dirname(model_path), exist_ok=True)
+        model.save_model(model_path)
+        
+        logger.info(f"{name} saved locally.")
+
+        # Upload the model to Google Cloud Storage
+        upload_to_gcs(
+            local_path=model_path,
+            bucket_name=cloud_paths["gcs_bucket"],
+            blob_name=cloud_paths["blobs"][name]
+        )
+
+        logger.info(f"{name} uploaded to Google Cloud Storage.")
+
 
 if __name__ == "__main__":
-    train_aft_model()
-    train_causal_model()
+    train_and_save_models()
