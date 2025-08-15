@@ -155,6 +155,7 @@ def train_causal_model(complete_df: DataFrame, subset_df: DataFrame) -> Booster:
 
     causal_effect_estimates = est.const_marginal_effect(X).squeeze()
 
+
     pipeline = create_aft_pipeline(drop_issue_d=True)
 
     # We are not fitting AFT this time, so no need for the bounds
@@ -162,7 +163,7 @@ def train_causal_model(complete_df: DataFrame, subset_df: DataFrame) -> Booster:
     
     causal_col = ["predicted_causal_effect"]
     
-    transformed_df[causal_col[0]] = causal_effect_estimates
+    transformed_df[causal_col[0]] = pd.Series(causal_effect_estimates, index=X.index)
 
     causal_X = transformed_df.drop(columns=causal_col)
     causal_y = transformed_df[causal_col]
