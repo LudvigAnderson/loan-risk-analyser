@@ -11,7 +11,6 @@ class XGBoostAFT(BaseEstimator, RegressorMixin):
             max_depth: int = 6,
             learning_rate: float = 0.3,
             gamma: float = 0.0,
-            min_child_weight: float = 1.0,
             random_state: int = None,
             monotone_constraints: Dict[str, int] = None,
             early_stopping_rounds: int = 20,
@@ -23,7 +22,6 @@ class XGBoostAFT(BaseEstimator, RegressorMixin):
         self.max_depth = max_depth
         self.learning_rate = learning_rate
         self.gamma = gamma
-        self.min_child_weight = min_child_weight
 
         self.early_stopping_rounds = early_stopping_rounds
         self.X_val = X_val
@@ -47,9 +45,10 @@ class XGBoostAFT(BaseEstimator, RegressorMixin):
             "learning_rate": self.learning_rate,
             "max_depth": self.max_depth,
             "gamma": self.gamma,
-            "min_child_weight": self.min_child_weight,
-            "seed": self.random_state
         }
+
+        if self.random_state is not None:
+            self.xgb_params["seed"] = self.random_state
 
         # Create DMatrix for eval
         if (
@@ -87,7 +86,7 @@ class XGBoostAFT(BaseEstimator, RegressorMixin):
         return self
     
     def predict(self, X: DataFrame):
-        X = X.copy()
+        X = X.copy()[self.model_.feature_names]
         dtest = xgb.DMatrix(X)
         predictions = self.model_.predict(dtest, output_margin=True)
         return predictions # Outputs the mean of ln(T), exponentiate with base e to get median of T

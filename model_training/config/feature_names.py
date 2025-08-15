@@ -6,14 +6,14 @@ PREDICTION_FEATURES = [
     "emp_length", "annual_inc", "addr_state",
 
     # credit status
-    "dti", "bc_util", "total_bc_limit", "bc_open_to_buy", "delinq_2yrs",
-    "revol_util", "total_acc", "percent_bc_gt_75", "delinq_amnt", "il_util",
+    "dti", "bc_util", "total_bc_limit", "delinq_2yrs",
+    "total_acc", "percent_bc_gt_75", "il_util",
 
     # credit history
     "acc_open_past_24mths", "tot_cur_bal", "num_sats", "total_bal_ex_mort",
-    "earliest_cr_line", "mths_since_last_delinq", "mths_since_last_record",
-    "collections_12_mths_ex_med", "num_tl_90g_dpd_24m", "pub_rec_bankruptcies",
-    "inq_last_6mths", "pct_tl_nvr_dlq",
+    "earliest_cr_line", "mths_since_last_delinq",
+    "collections_12_mths_ex_med", "pub_rec_bankruptcies",
+    "inq_last_6mths",
 ]
 
 NUISANCE_EXCLUDED_FEATURES = [

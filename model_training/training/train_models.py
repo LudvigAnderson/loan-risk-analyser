@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 
 import optuna
+import xgboost
 from xgboost import XGBRegressor, XGBClassifier, Booster
 from econml.dml import LinearDML
 
@@ -42,25 +43,27 @@ def _split_data(df: DataFrame, data_splits: Dict) -> Dict:
     return final_data
 
 def _run_trials(data: Dict, constraints: Dict, n_trials: int = 5) -> Study:
+    X_train = data["train"]["X"]
+    y_train = data["train"]["y"]
     X_optuna = data["optuna_val"]["X"]
     y_optuna = data["optuna_val"]["y"]
+    X_val = data["xgboost_val"]["X"]
+    y_val = data["xgboost_val"]["y"]
     
     def objective(trial: Trial):
 
         model = XGBoostAFT(
             learning_rate=trial.suggest_float("learning_rate", 0.01, 0.3, log=True),
             gamma=trial.suggest_float("gamma", 1e-3, 10.0),
-            min_child_weight=trial.suggest_float("min_child_weight", 1, 10.0),
             max_depth=trial.suggest_int("max_depth", 6, 12),
             num_boost_round=trial.suggest_int("num_boost_round", 100, 1000),
 
-            X_val=data["xgboost_val"]["X"],
-            y_val=data["xgboost_val"]["y"],
+            X_val=X_val,
+            y_val=y_val,
             monotone_constraints=constraints,
         )
 
-        model.fit(data["train"]["X"], data["train"]["y"])
-
+        model.fit(X_train, y_train)
         c_index = concordance_index(model, X_optuna, y_optuna)
 
         return c_index
@@ -74,7 +77,7 @@ def _run_trials(data: Dict, constraints: Dict, n_trials: int = 5) -> Study:
     return study
 
 
-def train_aft_model(df: DataFrame, n_trials=5):  
+def train_aft_model(df: DataFrame, n_trials=5) -> Booster:  
     settings = load_training_settings()
 
     # Date ranges for training, testing, validation (for XGBoost eval and Optuna)
@@ -88,13 +91,11 @@ def train_aft_model(df: DataFrame, n_trials=5):
     transformed_df = pipeline.fit_transform(df)
 
     # Split the data into X and y for training, testing, validation
+    # Note: this removes the "issue_d" column
     data = _split_data(transformed_df, data_splits)
 
     # Use Optuna for hyperparameter optimization
     study = _run_trials(data, monotone_constraints, n_trials=n_trials)
-
-    X_test = data["test"]["X"]
-    y_test = data["test"]["y"]
 
     full_X_train = pd.concat([data["train"]["X"], data["optuna_val"]["X"]])
     full_y_train = pd.concat([data["train"]["y"], data["optuna_val"]["y"]])
@@ -102,15 +103,14 @@ def train_aft_model(df: DataFrame, n_trials=5):
     model_params = {k: v for k, v in study.best_trial.params.items()}
 
     best_model = XGBoostAFT(
-        **model_params,
-        X_val=data["xgboost_val"]["X"],
-        y_val=data["xgboost_val"]["y"],
-        monotone_constraints=monotone_constraints
+       **model_params,
+       X_val=data["xgboost_val"]["X"],
+       y_val=data["xgboost_val"]["y"],
+       monotone_constraints=monotone_constraints
     )
-
     best_model.fit(full_X_train, full_y_train)
 
-    #c_index = concordance_index(best_model, X_test, y_test) # Maybe move to API?
+    #c_index = concordance_index(best_model, X_test, y_test)
 
     return best_model.get_booster()
 

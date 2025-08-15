@@ -31,13 +31,14 @@ def create_aft_pipeline(drop_issue_d: bool = False) -> Pipeline:
         "issue_year",
 
         "addr_state",
-        "application_type",
 
         "num_sats",
-        "total_bal_il",
         "tot_cur_bal",
         "int_rate",
         "term",
+
+        "loan_amnt",
+        
     ]
     if drop_issue_d:
         cols_to_drop.append("issue_d")
@@ -50,7 +51,6 @@ def create_aft_pipeline(drop_issue_d: bool = False) -> Pipeline:
             cols=[
                 "last_pymnt_d",
                 "pub_rec_bankruptcies",
-                "revol_util",
                 "dti",
                 "collections_12_mths_ex_med",
                 "inq_last_6mths",
@@ -89,10 +89,8 @@ def create_aft_pipeline(drop_issue_d: bool = False) -> Pipeline:
         ("percentage_transformer", PercentageTransformer(
             cols=[
                 "dti",
-                "revol_util",
                 "il_util",
                 "bc_util",
-                "pct_tl_nvr_dlq",
                 "percent_bc_gt_75"
             ]
         )),
@@ -104,8 +102,6 @@ def create_aft_pipeline(drop_issue_d: bool = False) -> Pipeline:
                 "loan_amnt",
                 "annual_inc",
                 "total_bc_limit",
-                "bc_open_to_buy",
-                "delinq_amnt",
                 "tot_cur_bal",
                 "total_bal_ex_mort",
             ]
@@ -114,11 +110,11 @@ def create_aft_pipeline(drop_issue_d: bool = False) -> Pipeline:
         # Makes interaction terms
         ("interaction_transformer", InteractionTransformer(
             features={
-                "loan/inc": ("loan_amnt", "annual_inc", dividep1),
+                "monthly_principal": ("loan_amnt", "term", divide),
+                "principal/inc": ("monthly_principal", "annual_inc", dividep1),
                 "total_bal/inc": ("tot_cur_bal", "annual_inc", dividep1),
                 "acc_satisfied_rate": ("num_sats", "total_acc", divide),
-                "loan/term": ("loan_amnt", "term", divide),
-                "emp_length/term": ("emp_length", "term", divide),
+                #"emp_length/term": ("emp_length", "term", divide),
             }
         )),
 
