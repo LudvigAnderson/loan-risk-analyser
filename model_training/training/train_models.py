@@ -117,7 +117,7 @@ def train_aft_model(df: DataFrame, n_trials=5) -> Booster:
 
 
 
-def train_causal_model(complete_df: DataFrame) -> Booster:
+def train_causal_model(complete_df: DataFrame, subset_df: DataFrame) -> Booster:
     settings = load_training_settings()
     nuissance_params = settings["nuissance_params"]
 
@@ -155,13 +155,10 @@ def train_causal_model(complete_df: DataFrame) -> Booster:
 
     causal_effect_estimates = est.const_marginal_effect(X).squeeze()
 
-    # Choose only the features that will be available in production
-    df = complete_df[PREDICTION_FEATURES]
-
     pipeline = create_aft_pipeline(drop_issue_d=True)
 
     # We are not fitting AFT this time, so no need for the bounds
-    transformed_df = pipeline.fit_transform(df).drop(columns=["lower_bound", "upper_bound"])
+    transformed_df = pipeline.fit_transform(subset_df).drop(columns=["lower_bound", "upper_bound"])
     
     causal_col = ["predicted_causal_effect"]
     
@@ -187,7 +184,7 @@ def train_models(data_path=None) -> Tuple[Booster, Booster]:
     # Get the data from Google Cloud Storage, or locally if a path is provided
     df = get_lending_club_data(path=data_path)
     aft = train_aft_model(df[PREDICTION_FEATURES])
-    causal = train_causal_model(df)
+    causal = train_causal_model(complete_df=df, subset_df=df[PREDICTION_FEATURES])
 
     return aft, causal
 
