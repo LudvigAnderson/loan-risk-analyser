@@ -77,7 +77,7 @@ def _run_trials(data: Dict, constraints: Dict, n_trials: int = 5) -> Study:
     return study
 
 
-def train_aft_model(df: DataFrame, n_trials=5) -> Booster:  
+def train_aft_model(df: DataFrame, n_trials: int = 5) -> Booster:  
     settings = load_training_settings()
 
     # Date ranges for training, testing, validation (for XGBoost eval and Optuna)
@@ -117,7 +117,7 @@ def train_aft_model(df: DataFrame, n_trials=5) -> Booster:
 
 
 
-def train_causal_model(complete_df: DataFrame, subset_df: DataFrame) -> Booster:
+def train_causal_model(complete_df: DataFrame, subset_df: DataFrame, run_local: bool = False) -> Booster:
     settings = load_training_settings()
     nuissance_params = settings["nuissance_params"]
 
@@ -134,8 +134,8 @@ def train_causal_model(complete_df: DataFrame, subset_df: DataFrame) -> Booster:
     X = transformed_df.drop(columns=y_cols + t_cols)
 
     # Create nuissance models for y and t
-    interest_rate_model = XGBoostDML(nuissance_params, XGBRegressor)
-    default_rate_model = XGBoostDML(nuissance_params, XGBClassifier)
+    interest_rate_model = XGBoostDML(nuissance_params, XGBRegressor, run_local=run_local)
+    default_rate_model = XGBoostDML(nuissance_params, XGBClassifier, run_local=run_local)
 
     est = LinearDML(
         model_y=default_rate_model,
@@ -164,6 +164,7 @@ def train_causal_model(complete_df: DataFrame, subset_df: DataFrame) -> Booster:
     causal_col = ["predicted_causal_effect"]
     
     transformed_df[causal_col[0]] = pd.Series(causal_effect_estimates, index=X.index)
+    transformed_df = transformed_df.dropna(subset=causal_col) # There will be a mismatch of a few rows, so drop NA
 
     causal_X = transformed_df.drop(columns=causal_col)
     causal_y = transformed_df[causal_col]
@@ -181,18 +182,18 @@ def train_causal_model(complete_df: DataFrame, subset_df: DataFrame) -> Booster:
     return causal_model.get_booster()
 
 
-def train_models(data_path=None) -> Tuple[Booster, Booster]:
+def train_models(data_path=None, n_trials: int = 5) -> Tuple[Booster, Booster]:
     # Get the data from Google Cloud Storage, or locally if a path is provided
     df = get_lending_club_data(path=data_path)
-    aft = train_aft_model(df[PREDICTION_FEATURES])
+    aft = train_aft_model(df[PREDICTION_FEATURES], n_trials=n_trials)
     causal = train_causal_model(complete_df=df, subset_df=df[PREDICTION_FEATURES])
 
     return aft, causal
 
-def train_and_save_models(data_path=None):
+def train_and_save_models(data_path=None, n_trials: int = 5):
     cloud_paths = load_gcloud_paths()
 
-    aft, causal = train_models(data_path)
+    aft, causal = train_models(data_path, n_trials=n_trials)
 
     models = {
         "aft_model": aft,
