@@ -32,10 +32,7 @@ class LoanApplicant(BaseModel):
     credit_history_months: int
     mths_since_last_delinq: Optional[int]
     pub_rec_bankruptcies: int
-    mths_since_last_record: Optional[int]
     delinq_2yrs: int
-    delinq_amnt: float
     collections_12_mths_ex_med: int
-    num_tl_90g_dpd_24m: int
     
 

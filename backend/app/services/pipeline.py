@@ -14,9 +14,7 @@ def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     # Need to use the safe division
 
     df["bc_util"] = df["bc_bal"] / df["total_bc_limit"]
-    df["revol_util"] = df["bc_util"]
     df["dti"] = df["monthly_installments"] / (df["annual_inc"] / 12)
-    df["bc_open_to_buy"] = df["total_bc_limit"] - df["bc_bal"]
 
     init_il = df["init_mortgage"] + df["init_student_loan"] + df["init_car_loan"] + df["init_consumer_loan"]
     cur_il = df["mortgage"] + df["student_loan"] + df["car_loan"] + df["consumer_loan"]
@@ -25,19 +23,16 @@ def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     df["tot_cur_bal"] =  df["bc_bal"] + cur_il
     df["total_bal_ex_mort"] = df["tot_cur_bal"] - df["mortgage"]
 
-    df["loan/inc"] = df["loan_amnt"] / df["annual_inc"]
-    df["emp_length/term"] = df["emp_length"] / df["term"]
-    df["acc_satisfied_rate"] = df["num_sats"] / df["total_acc"] # Need to fix this
-    df["loan/term"] = df["loan_amnt"] / df["term"]
+    df["monthly_principal"] = df["loan_amnt"] / df["term"]
+    df["principal/inc"] = df["monthly_principal"] / df["annual_inc"]
     df["total_bal/inc"] = df["tot_cur_bal"] / df["annual_inc"]
-
-    df["pct_tl_nvr_dlq"] = np.divide(df["num_sats"], df["total_acc"])
+    df["acc_satisfied_rate"] = np.divide(df["num_sats"], df["total_acc"])
 
     # In a real production environment, I would consider setting
     # this value based on an API call to Statistics Norway, so that
     # it can update for every month. However, for this portfolio
     # project, I consider it adequate to use the last month's rate.
-    df["unemployment_rate"] = 0.46
+    df["unemployment_rate"] = 0.046
 
     df["date"] = pd.to_datetime(date.today())
 

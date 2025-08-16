@@ -3,7 +3,6 @@ from app.utils.settings_loader import load_gcloud_paths
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import FastAPI
-from shap import TreeExplainer
 from xgboost import Booster
 
 from typing import Tuple
@@ -61,10 +60,7 @@ async def load_ml_models(app: FastAPI):
         causal_model = Booster()
         causal_model.load_model(bytearray(causal_bytes))
 
-        aft_shap_explainer = TreeExplainer(aft_model)
-
         app.state.aft_model = aft_model
         app.state.aft_hash = aft_hash
         app.state.causal_model = causal_model
         app.state.causal_hash = causal_hash
-        app.state.aft_shap_explainer = aft_shap_explainer

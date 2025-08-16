@@ -3,7 +3,6 @@ import numpy as np
 from app.services.pipeline import transform_data
 
 from xgboost import Booster, DMatrix
-from shap import TreeExplainer
 from pandas import DataFrame
 from typing import Dict, Tuple, Any
 from app.models.loan_applicant import LoanApplicant
@@ -18,11 +17,12 @@ def predict(model: Booster, df: DataFrame, output_margin: bool = False) -> float
     dmatrix = DMatrix(reordered_df)
     return float(model.predict(dmatrix, output_margin=output_margin)[0])
 
-def get_shap_values(model: Booster, explainer: TreeExplainer, df: DataFrame) -> Tuple[list, float]:
+def get_shap_values(model: Booster, df: DataFrame) -> Tuple[list, float]:
     reordered_df = _reorder_df(model, df)
-    explanation = explainer(reordered_df)
-    shap_values = explanation.values[0].tolist()
-    base_value = float(explanation.base_values[0])
+    dmatrix = DMatrix(reordered_df)
+    shap_matrix = model.predict(dmatrix, pred_contribs=True, validate_features=True)
+    shap_values = shap_matrix[0][:-1]
+    base_value = shap_matrix[0][-1]
 
     shap_values = dict(zip(model.feature_names, shap_values))
 
@@ -32,13 +32,12 @@ def get_shap_values(model: Booster, explainer: TreeExplainer, df: DataFrame) -> 
 def get_all_calculations(app: FastAPI, data: LoanApplicant) -> Dict[str, Any]:
     aft_model: Booster = app.state.aft_model
     causal_model: Booster = app.state.causal_model
-    explainer: TreeExplainer = app.state.aft_shap_explainer
 
     df = transform_data(data, app)
 
     median_survival_time = predict(aft_model, df)
     causal_effect = predict(causal_model, df)
-    shap_values, base_value = get_shap_values(aft_model, explainer, df)
+    shap_values, base_value = get_shap_values(aft_model, df)
 
     return {
         "median_survival_time": median_survival_time,
