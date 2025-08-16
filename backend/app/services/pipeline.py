@@ -23,6 +23,8 @@ def transform_data(data: LoanApplicant, app: FastAPI) -> DataFrame:
     df["tot_cur_bal"] =  df["bc_bal"] + cur_il
     df["total_bal_ex_mort"] = df["tot_cur_bal"] - df["mortgage"]
 
+    df["percent_bc_gt_75"] = df["percent_bc_gt_75"] / 100
+
     df["monthly_principal"] = df["loan_amnt"] / df["term"]
     df["principal/inc"] = df["monthly_principal"] / df["annual_inc"]
     df["total_bal/inc"] = df["tot_cur_bal"] / df["annual_inc"]

@@ -22,9 +22,9 @@ def get_shap_values(model: Booster, df: DataFrame) -> Tuple[list, float]:
     dmatrix = DMatrix(reordered_df)
     shap_matrix = model.predict(dmatrix, pred_contribs=True, validate_features=True)
     shap_values = shap_matrix[0][:-1]
-    base_value = shap_matrix[0][-1]
+    base_value = float(shap_matrix[0][-1])
 
-    shap_values = dict(zip(model.feature_names, shap_values))
+    shap_values = {feature: float(shap) for feature, shap in zip(model.feature_names, shap_values)}
 
     return shap_values, base_value
 
