@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+.header1 {
+  @apply text-4xl font-bold mb-4;
+}
+
+.header2 {
+  @apply text-3xl font-medium mb-3;
+}
+
+.header3 {
+  @apply text-2xl font-medium mb-2;
+}
+
+.btn {
+  @apply cursor-pointer border border-transparent text-white rounded-md px-4 py-2 bg-indigo-500 hover:bg-indigo-700
+}
+
+.hidden-measurer {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tooltip-text {
+  text-decoration: dotted;
+  text-decoration-line: underline;
+  @apply decoration-gray-500 decoration-2
+}
+
+.disabled-input {
+  @apply bg-gray-200 hover:bg-gray-200 text-gray-500 cursor-not-allowed rounded-md px-3 py-2 focus:outline-none caret-transparent;
+}
+
+.slightly-green {
+  @apply bg-green-100 hover:bg-green-200;
+}
+
+.slightly-red {
+  @apply bg-red-100 hover:bg-red-200;
+}
