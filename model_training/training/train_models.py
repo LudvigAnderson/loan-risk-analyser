@@ -5,7 +5,7 @@ import os
 import optuna
 import xgboost
 from xgboost import XGBRegressor, XGBClassifier, Booster
-from econml.dml import LinearDML
+from econml.dml import LinearDML, CausalForestDML
 
 from models import XGBoostAFT, XGBoostDML
 from utils.settings_loader import load_training_settings, load_gcloud_paths
@@ -137,11 +137,24 @@ def train_causal_model(complete_df: DataFrame, subset_df: DataFrame, run_local: 
     interest_rate_model = XGBoostDML(nuissance_params, XGBRegressor, run_local=run_local)
     default_rate_model = XGBoostDML(nuissance_params, XGBClassifier, run_local=run_local)
 
-    est = LinearDML(
+    est = CausalForestDML(
         model_y=default_rate_model,
         model_t=interest_rate_model,
-        discrete_outcome=True
+        discrete_outcome=True,
+
+        n_estimators=200,
+        max_depth=10,
+        min_samples_leaf=200,
+        max_samples=0.2,
+        n_jobs=-1,
+        random_state=123,
     )
+
+    # est = LinearDML(
+    #     model_y=default_rate_model,
+    #     model_t=interest_rate_model,
+    #     discrete_outcome=True
+    # )
 
     logger.info("DML beginning.")
 
