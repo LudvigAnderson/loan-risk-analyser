@@ -10,7 +10,7 @@ export default function SkillsModal() {
     <BaseModal
       isOpen={isOpen}
       setIsOpen={setIsOpen}
-      buttonText="What skills have I used in making this project?"
+      buttonText="Skills illustrated by this project"
       title="Skills"
     >
       <div className="flex flex-wrap">

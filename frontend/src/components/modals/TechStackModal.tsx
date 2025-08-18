@@ -47,9 +47,10 @@ export default function TechStackModal() {
             <li>Cloud Storage & Artifact Registry</li>
           </UnorderedList>
         </Accordion>
-        <Accordion buttonText="Automation">
+        <Accordion buttonText="Deployment">
           <UnorderedList>
             <li>GitHub Actions</li>
+            <li>Docker</li>
           </UnorderedList>
         </Accordion>
       </div>
