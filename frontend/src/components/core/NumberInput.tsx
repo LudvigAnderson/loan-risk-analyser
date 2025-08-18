@@ -38,7 +38,13 @@ export default function NumberInput({
   useEffect(() => {
     if (!variableName || !presetData) return;
     const v = presetData[variableName];
-    setRawValue(v != null ? v.toString() : null);
+    if (v == null) {
+      setIsNA(true);
+      setRawValue(null);
+    }
+    else {
+      setRawValue(v.toString());
+    }
   }, [presetData])
 
   function formatNumber(value: string | null): string {

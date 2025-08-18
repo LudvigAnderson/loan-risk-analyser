@@ -5,7 +5,7 @@ class LoanApplicant(BaseModel):
     annual_inc: float
     loan_amnt: float
     term: int # in months
-    emp_length: int
+    emp_length: Optional[int]
 
     bc_bal: float
     total_bc_limit: float

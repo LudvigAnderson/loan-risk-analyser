@@ -130,7 +130,7 @@ export default function ApplicantForm() {
           <Accordion buttonText="Employment and income">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
               <NumberInput presetData={presetData} label="Annual income" unit="kr" variableName="annual_inc" />
-              <NumberInput presetData={presetData} label="Employment length" unit="years" variableName="emp_length" />
+              <NumberInput presetData={presetData} label="Employment length" unit="years" variableName="emp_length" allowNotApplicable />
             </div>
           </Accordion>
 
