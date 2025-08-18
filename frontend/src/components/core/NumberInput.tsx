@@ -8,15 +8,16 @@ import type { FormData } from "../../presets/DataPresets";
 
 interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  variableName: keyof FormData;
+  variableName?: keyof FormData;
   unit?: string;
   allowNotApplicable?: boolean
   description?: string;
   decimalPlaces?: number;
-  presetData: FormData;
+  presetData?: FormData;
+  defaultValue?: string;
 }
 
-const formatter = new Intl.NumberFormat("nb-NO");
+const formatter = new Intl.NumberFormat("fr-CH");
 
 export default function NumberInput({
   label,
@@ -26,14 +27,16 @@ export default function NumberInput({
   description,
   decimalPlaces=2,
   presetData,
+  defaultValue="",
   className="",
   ...props 
 }: InputFieldProps) {
-  const [rawValue, setRawValue] = useState<string | null>("");
+  const [rawValue, setRawValue] = useState<string | null>(defaultValue);
   const [isNA, setIsNA] = useState(false);
   const isDisabled = useContext(FormDisabledContext);
 
   useEffect(() => {
+    if (!variableName || !presetData) return;
     const v = presetData[variableName];
     setRawValue(v != null ? v.toString() : null);
   }, [presetData])
@@ -45,11 +48,11 @@ export default function NumberInput({
     const formattedInteger = formatter.format(Number(parts[0]));
 
     if (parts.length > 1) {
-      return formattedInteger + "," + parts[1].slice(0, decimalPlaces);
+      return formattedInteger + "." + parts[1].slice(0, decimalPlaces);
     }
     
     if (value.endsWith(".")) {
-      return formattedInteger + ",";
+      return formattedInteger + ".";
     }
 
     return formattedInteger;

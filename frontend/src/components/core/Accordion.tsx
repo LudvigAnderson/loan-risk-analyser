@@ -29,7 +29,6 @@ export default function Accordion({ buttonText, children, baseClassName, closedC
   function handleOnClick() {
     setIsOpen(prev => !prev)
     if (measurerRef.current) {
-      console.log("The scrollHeight is", measurerRef.current.scrollHeight);
       setHeight(measurerRef.current.scrollHeight + paddingB + paddingT);
     }
   }

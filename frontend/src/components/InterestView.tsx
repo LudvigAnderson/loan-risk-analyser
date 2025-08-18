@@ -10,7 +10,7 @@ export default function InterestView() {
   return (
     <>
       {data != undefined ? (
-        <div className="flex flex-wrap">
+        <div className="flex flex-wrap pt-6">
           <div className="w-1/2"><InterestTable /></div>
           <div className="w-1/2"><InterestGraph /></div>
         </div>

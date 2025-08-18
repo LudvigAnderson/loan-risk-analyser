@@ -165,7 +165,7 @@ export default function SHAPTable() {
                 </div>
               )
               return (
-                <tr>
+                <tr key={category}>
                   <td colSpan={2}>
                     <Accordion
                       buttonText={buttonText}
@@ -182,7 +182,7 @@ export default function SHAPTable() {
                             const contribution = (Math.exp(shapValues[feature]) - 1) * 100;
                             const explanation = featureExplanations[feature].name.trim();
                             return (
-                            <tr className={(contribution > 0) ? "slightly-green" : "slightly-red"}>
+                            <tr key={feature} className={(contribution > 0) ? "slightly-green" : "slightly-red"}>
                               <td className="shap-column w-1/2 whitespace-nowrap">{explanation}</td>
                               <td className="shap-column w-1/2">{(contribution > 0) && "+"}{contribution.toFixed(1)}%</td>
                             </tr>
@@ -190,11 +190,8 @@ export default function SHAPTable() {
                           })}
                         </tbody>
                       </table>
-                    </Accordion></td>
-                  {/*
-                  <td className="shap-column w-1/2">{category}</td>
-                  <td className="shap-column w-1/2">{(totalShap > 0) && "+"}{((Math.exp(totalShap) - 1) * 100).toFixed(1)}%</td>
-                  */}
+                    </Accordion>
+                  </td>
                 </tr>
               )
             })}

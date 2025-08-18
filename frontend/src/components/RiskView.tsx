@@ -12,11 +12,11 @@ export default function RiskView() {
       {data != undefined ? (
         <div className="flex flex-wrap pt-6">
           <div className="w-1/2">
-            <h3 className="header3 underline text-center">How is the survival chance calculated?</h3>
+            <h3 className="header3 text-center">How is the survival chance calculated?</h3>
             <SHAPTable />
           </div>
           <div className="w-1/2">
-            <h3 className="header3 underline text-center">Applicant survival chance over time</h3>
+            <h3 className="header3 text-center">Applicant survival chance over time</h3>
             <SurvivalGraph />
           </div>
         </div>
