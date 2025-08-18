@@ -94,7 +94,6 @@ export default function ApplicantForm() {
 
   return(
     <>
-      <h2 className="header2">Loan & Applicant Information</h2>
       <div className="flex flex-row items-center pb-3">
         <span>Load preset data:</span>
         <div className="flex flex-row ml-3 space-x-1">

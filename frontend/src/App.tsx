@@ -16,15 +16,15 @@ function App() {
           <Navbar />
         </nav>
       </header>
-      <main className="container mx-auto px-4">
+      <main className="container mx-auto px-4 pt-4">
         <section>
           <DataProvider>
             <FormProvider>
-
+              <div className="border-b mb-2 w-full items-center"><h2 className="header2 text-center">Loan & Applicant Information</h2></div>
               <ApplicantForm />
 
               <div className="py-2"></div>
-
+              <div className="border-b mb-2 w-full items-center"><h2 className="header2 text-center">Predictions & Calculations</h2></div>
               <TabsContainer>
                 <TabView label="Base Risk Prediction"><RiskView /></TabView>
                 <TabView label="Interest Calculation"><InterestView /></TabView>
@@ -35,7 +35,7 @@ function App() {
         </section>
         
       </main>
-
+      <footer className="py-12"></footer>
     </>
   )
 }

@@ -8,21 +8,28 @@ import type { ReactNode } from "react";
 import FormDisabledContext from "../../contexts/FormDisabledContext";
 
 interface AccordionProps {
-  buttonText: string
-  children: ReactNode
+  buttonText: ReactNode;
+  children: ReactNode;
+  baseClassName?: string;
+  closedClassName?: string;
+  openClassName?: string;
+  insideClassName?: string;
+  paddingY?: number;
+  useChevron?: boolean
 }
 
-export default function Accordion({ buttonText, children }: AccordionProps) {
+export default function Accordion({ buttonText, children, baseClassName, closedClassName, openClassName, insideClassName, paddingY, useChevron=true }: AccordionProps) {
   const measurerRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
 
-  const paddingB = 2;
-  const paddingT = 2;
+  const paddingB = paddingY ?? 2;
+  const paddingT = paddingY ?? 2;
 
   function handleOnClick() {
     setIsOpen(prev => !prev)
     if (measurerRef.current) {
+      console.log("The scrollHeight is", measurerRef.current.scrollHeight);
       setHeight(measurerRef.current.scrollHeight + paddingB + paddingT);
     }
   }
@@ -32,13 +39,20 @@ export default function Accordion({ buttonText, children }: AccordionProps) {
       setHeight(measurerRef.current.scrollHeight + paddingB + paddingT);
     }
   }, [children]);
-  
+
+  const baseButtonClass = baseClassName ?? "group flex items-center gap-2 !text-black cursor-pointer border border-transparent px-4 py-2 w-full";
+  const closedButtonClass = closedClassName ?? "!bg-gray-100 hover:!bg-gray-300";
+  const openButtonClass = openClassName ?? "!bg-gray-300 hover:!bg-gray-400";
+
+  const insideContentClass= insideClassName ?? "px-5";
+
+
   return (
     <Disclosure>
 
-      <DisclosureButton onClick={handleOnClick} className={"group flex items-center gap-2 !text-black cursor-pointer border border-transparent px-4 py-2 w-full " + (isOpen ? "!bg-gray-300 hover:!bg-gray-400" : "!bg-gray-100 hover:!bg-gray-300")}>
+      <DisclosureButton onClick={handleOnClick} className={baseButtonClass + " " + (isOpen ? openButtonClass : closedButtonClass)}>
         {buttonText}
-        <ChevronDownIcon className="w-5 group-data-open:rotate-180" />
+        {useChevron && <ChevronDownIcon className="w-5 group-data-open:rotate-180" />}
       </DisclosureButton>
       <div className="overflow-hidden">
 
@@ -54,14 +68,14 @@ export default function Accordion({ buttonText, children }: AccordionProps) {
             transition={{ duration: 0.4, ease: easeInOut }}
             className="origin-top overflow-hidden"
           >
-          <DisclosurePanel static className="px-5">
+          <DisclosurePanel static className={insideContentClass}>
               {children}
           </DisclosurePanel>
         </motion.div>
   
         
       </div>
-      <DisclosurePanel static className="hidden-measurer px-5" ref={measurerRef}>
+      <DisclosurePanel static className={"hidden-measurer " + insideContentClass} ref={measurerRef}>
           <FormDisabledContext.Provider value={true}>
             {children}
           </FormDisabledContext.Provider>

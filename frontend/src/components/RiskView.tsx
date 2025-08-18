@@ -10,9 +10,15 @@ export default function RiskView() {
   return (
     <>
       {data != undefined ? (
-        <div className="flex flex-wrap">
-          <div className="w-1/2"><SHAPTable /></div>
-          <div className="w-1/2"><SurvivalGraph /></div>
+        <div className="flex flex-wrap pt-6">
+          <div className="w-1/2">
+            <h3 className="header3 underline text-center">How is the survival chance calculated?</h3>
+            <SHAPTable />
+          </div>
+          <div className="w-1/2">
+            <h3 className="header3 underline text-center">Applicant survival chance over time</h3>
+            <SurvivalGraph />
+          </div>
         </div>
       ) : (
         <p>Submit applicant data first.</p>

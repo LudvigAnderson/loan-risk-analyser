@@ -20,6 +20,10 @@
   position: absolute;
   visibility: hidden;
   pointer-events: none;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
 }
 
 .tooltip-text {
@@ -38,4 +42,16 @@
 
 .slightly-red {
   @apply bg-red-100 hover:bg-red-200;
+}
+
+.more-green {
+  @apply bg-green-200 hover:bg-green-300;
+}
+
+.more-red {
+  @apply bg-red-200 hover:bg-red-300;
+}
+
+.shap-column {
+  @apply border border-gray-300 px-4 py-2;
 }
