@@ -1,10 +1,10 @@
 # Loan Risk Analyser
 
-This project uses the Lending Club data set to predict the survival time (time until default) for loan applicants.
+This project uses the Lending Club data set to predict the survival time (time until default) for loan applicants. See the individual folders for more detailed README.md files.
 
 ## Model Training
 
-`model_training/` is actually more of an ML pipeline, and does the following:
+`model_training/` implements the ML pipeline, and does the following:
 1. Retrieves a filtered Lending Club data set from Google Cloud Storage,
 2. Trains an XGBoost model with the Accelerated Failure Time (AFT) model as objective,
 3. Uses debiased/double ML to find the causal effect of interest rate on default rate,
@@ -17,7 +17,7 @@ This project uses the Lending Club data set to predict the survival time (time u
 
 ## Frontend
 
-`frontend/` is a React application that is hosted on Firebase.
+`frontend/` contains a React application that is hosted on Firebase.
 
 ## GitHub Actions + Docker + Google Cloud
 `.github/workflows/` is where you can find my GitHub Action YAML files. The following processes are entirely automated with GitHub Actions, the only thing I do is push the code:
