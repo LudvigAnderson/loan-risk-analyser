@@ -1,0 +1,26 @@
+name: Update Lines of Code
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.py"
+      - "**/*.ts"
+      - "**/*.tsx"
+  workflow_dispatch:
+
+jobs:
+  count-lines:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cloc
+      
+      - name: Show lines of code
+        run: cloc --include-ext=py,ts,tsx .
