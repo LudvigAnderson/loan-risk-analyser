@@ -22,7 +22,7 @@ export default function TabsContainer({ children }: TabsContainerProps) {
         {childrenArray.map((child, index) => (
           <Button
             key={index}
-            className={(index == activeIndex) ? "!bg-indigo-800" : ""}
+            className={(index == activeIndex) ? "btn !bg-indigo-800" : "btn"}
             onClick={() => setActiveIndex(index)}
           >{child.props.label}</Button>
         ))}

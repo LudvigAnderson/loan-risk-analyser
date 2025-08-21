@@ -7,13 +7,14 @@ interface BaseModalProps {
   setIsOpen: (b: boolean) => void;
   buttonText: string;
   title: string;
+  buttonClass?: string;
   children: ReactNode;
 }
 
-export default function BaseModal({ isOpen, setIsOpen, buttonText, title, children }: BaseModalProps) {
+export default function BaseModal({ isOpen, setIsOpen, buttonText, title, buttonClass, children }: BaseModalProps) {
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>{buttonText}</Button>
+      <Button onClick={() => setIsOpen(true)} className={buttonClass}>{buttonText}</Button>
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
         <DialogBackdrop className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 w-screen overflow-y-auto p-4">

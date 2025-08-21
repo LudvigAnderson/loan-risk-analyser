@@ -5,9 +5,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
 }
 
-export default function Button({ children, className="", ...props }: ButtonProps) {
+export default function Button({ children, className="btn", ...props }: ButtonProps) {
   return (
-    <HeadlessButton className={`btn ${className}`} {...props}>
+    <HeadlessButton className={className} {...props}>
       {children}
     </HeadlessButton>
   )

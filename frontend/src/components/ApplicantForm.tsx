@@ -101,7 +101,7 @@ export default function ApplicantForm() {
             <Button
               key={name}
               onClick={() => changePreset({ ...preset })}
-              className={isEqual(presetData, preset) ? "!bg-indigo-800" : ""}
+              className={isEqual(presetData, preset) ? "btn !bg-indigo-800" : "btn"}
             >{name}</Button>
           ))}
         </div>
@@ -204,7 +204,7 @@ export default function ApplicantForm() {
         </div>
         
         <div className="flex flex-row items-center mt-2">
-          <Button type="submit" disabled={loading} className={loading ? "disabled-input" : ""}>
+          <Button type="submit" disabled={loading} className={loading ? "btn disabled-input" : "btn"}>
             {loading ? "Getting predictions..." : "Predict risk"}
           </Button>
           {(elapsedTime > 0) && (

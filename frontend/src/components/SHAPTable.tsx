@@ -2,6 +2,7 @@ import { useContext, useMemo } from "react";
 import { DataContext } from "../contexts/DataContext";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import Accordion from "./core/Accordion";
+import SHAPCalculationsModal from "./modals/SHAPCalculationsModal";
 
 const shapGroups = {
   "Loan factors": [
@@ -135,8 +136,11 @@ export default function SHAPTable() {
       {data && shapValues && (
         <table className="min-w-full border-collapse border border-gray-300">
           <tbody>
-            <tr className="bg-gray-100">
+            <tr className="bg-gray-100 relative">
               <th colSpan={2} className="shap-column">Prediction</th>
+              <div className="absolute top-0 right-0 ">
+                <SHAPCalculationsModal />
+              </div>
             </tr>
             <tr>
               <td className="font-semibold shap-column w-1/2">Median survival time</td>
