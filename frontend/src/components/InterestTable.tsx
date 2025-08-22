@@ -2,7 +2,7 @@ import { useContext } from "react";
 import NumberInput from "./core/NumberInput";
 import { InterestDataContext, InterestRateContext, type InterestDataProps } from "../contexts/InterestDataContext";
 import { DataContext } from "../contexts/DataContext";
-import { expectedLoss, minIntRate } from "../services/RiskModelling";
+import { expectedLoss } from "../services/RiskModelling";
 
 
 
