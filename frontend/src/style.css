@@ -55,3 +55,7 @@
 .shap-column {
   @apply border border-gray-300 px-4 py-2;
 }
+
+.math-operator {
+  @apply font-bold absolute top-1/2 -left-2
+}

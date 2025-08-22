@@ -57,6 +57,8 @@ export default function LineGraph({ x, y, id, ymin, ymax, xmin, xmax, xlabel, yl
         //useMesh={true}
         yFormat=",.2%"
         xFormat={xPercent ? ",.2%" : undefined}
+
+        animate={false}
         
         enableArea={markerY != undefined}
         areaBaselineValue={markerY}

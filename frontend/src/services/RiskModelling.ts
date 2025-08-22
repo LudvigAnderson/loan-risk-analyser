@@ -40,7 +40,7 @@ function principalPayments(P: number, annualRate: number, n: number): number[] {
   return principalParts;
 }
 
-function expectedLoss({ loanAmount, term, mu, sigma = 1, intRate, causalEffect }: ExpectedLossParams): number {
+export function expectedLoss({ loanAmount, term, mu, sigma = 1, intRate, causalEffect }: ExpectedLossParams): number {
   const months = Array.from({ length: term + 1 }, (_, i) => i);
   const adjustedMu = adjustedMuLogT(mu, intRate*100, causalEffect, term, sigma); // the causal effect currently assumes interest percentage points
   const principals = principalPayments(loanAmount, intRate, term); // [0, p_1, p_2, ...]

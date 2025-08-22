@@ -10,11 +10,13 @@ interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   variableName?: keyof FormData;
   unit?: string;
+  outsideText?: string;
   allowNotApplicable?: boolean
   description?: string;
   decimalPlaces?: number;
   presetData?: FormData;
-  defaultValue?: string;
+  defaultValue?: string | number;
+  extraOnChange?: (val: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const formatter = new Intl.NumberFormat("fr-CH");
@@ -23,15 +25,17 @@ export default function NumberInput({
   label,
   variableName,
   unit,
+  outsideText,
   allowNotApplicable,
   description,
   decimalPlaces=2,
   presetData,
-  defaultValue="",
+  defaultValue,
+  extraOnChange,
   className="",
   ...props 
 }: InputFieldProps) {
-  const [rawValue, setRawValue] = useState<string | null>(defaultValue);
+  const [rawValue, setRawValue] = useState<string | null>(null);
   const [isNA, setIsNA] = useState(false);
   const isDisabled = useContext(FormDisabledContext);
 
@@ -46,6 +50,17 @@ export default function NumberInput({
       setRawValue(v.toString());
     }
   }, [presetData])
+
+  useEffect(() => {
+    if (!defaultValue) return;
+    if (defaultValue == null) {
+      setIsNA(true);
+      setRawValue(null);
+    }
+    else {
+      setRawValue(defaultValue.toString());
+    }
+  }, [defaultValue])
 
   function formatNumber(value: string | null): string {
     if (value == null) return "N/A";
@@ -72,6 +87,10 @@ export default function NumberInput({
     }
     numericString = numericString.replace(",", ".");
     setRawValue(numericString);
+
+    if (extraOnChange) {
+      extraOnChange(e);
+    }
   }
 
   function handleNAChange(e: ChangeEvent<HTMLInputElement>) {
@@ -106,7 +125,7 @@ export default function NumberInput({
         </Label>
       </Tooltip>
       
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 relative w-32">
         <Input
           disabled={isDisabled}
           readOnly={isNA}
@@ -114,7 +133,7 @@ export default function NumberInput({
           onChange={handleChange}
           name={variableName}
           className={
-            "block w-32 rounded-md bg-white/5 px-3 py-2 " +
+            "block w-full rounded-md bg-white/5 px-3 py-2 " +
             "text-base outline-1 -outline-offset-1 " +
             "focus:outline-2 focus:-outline-offset-2 " +
             (isNA ? "disabled-input " : "") +
@@ -122,7 +141,8 @@ export default function NumberInput({
           }
           {...props}
         />
-        {unit && <span className="text-sm text-gray-400">{unit}</span>}
+        {outsideText && <span className="text-sm text-gray-400">{outsideText}</span>}
+        {unit && <span className="text-sm text-gray-400 absolute right-3 top-1/2 -translate-y-1/2">{unit}</span>}
       </div>
     </Field>
   )

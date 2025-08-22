@@ -1,5 +1,6 @@
 import React, { createContext, useState } from "react";
 import type { ReactNode } from "react";
+import type { FormData } from "../presets/DataPresets";
 
 interface DataProviderProps {
   children: ReactNode;
@@ -10,8 +11,8 @@ interface DataProps {
   causal_effect: number;
   base_value: number;
   shap_values: { [key: string]: number; };
-  raw_data: { [key: string]: number; };
-  transformed_data: { [key: string]: number; };
+  raw_data: FormData;//{ [key: string]: number; };
+  transformed_data: { [key in keyof FormData]: number; };
 }
 
 interface DataContextProps {
